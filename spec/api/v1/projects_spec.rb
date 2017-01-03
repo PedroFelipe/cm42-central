@@ -75,6 +75,7 @@ RSpec.describe V1::Projects do
 
   describe '#GET /api/v1/projects/{slug}/analysis' do
     let(:project) { create :project }
+    let(:date) { Time.current }
 
     let(:iteration) do
       double(
@@ -82,9 +83,31 @@ RSpec.describe V1::Projects do
         velocity: 10,
         volatility: 0,
         current_iteration_number: 32,
+        date_for_iteration: date.to_s,
+        date_for_iteration_number: date,
         backlog: [1, 2, 3],
-        backlog_iterations: [3, 2, 1]
+        backlog_iterations: [3, 2, 1],
+        current_iteration_details: {
+          "started": 8,
+          "finished": 5
+        },
+        backlog_date: [59, date],
+        worst_backlog_date: [59, date]
       )
+    end
+
+    let(:expected) do
+      {
+        "velocity" => 10,
+        "volatility" => 0,
+        "current_iteration_number" => 32,
+        "date_for_iteration" => "2016/12/07 08:00:00 -0200",
+        "backlog" =>  [1, 2, 3],
+        "backlog_iterations" => [3, 2, 1],
+        "current_iteration_details" => {"started" => 8, "finished" => 5},
+        "backlog_date" => [59, "2016/12/07 08:00:00 -0200"],
+        "worst_backlog_date" => [59, "2016/12/07 08:00:00 -0200"]
+      }
     end
 
     before(:each) do
@@ -95,9 +118,7 @@ RSpec.describe V1::Projects do
     end
 
     it 'returns the project with analysis' do
-      expected = Entities::ProjectAnalysis.new(iteration).as_json
-
-      expect(JSON.parse(response.body).symbolize_keys).to eq(expected)
+      expect(JSON.parse(response.body)).to eq(expected)
     end
 
     context 'when api token is invalid' do

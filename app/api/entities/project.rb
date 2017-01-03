@@ -1,4 +1,5 @@
 class Entities::Project < Entities::BaseEntity
+  expose :id
   expose :name
   expose :slug
   expose :point_scale
